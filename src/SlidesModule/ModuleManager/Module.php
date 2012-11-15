@@ -14,7 +14,8 @@ class Module
 
     public function getConfig()
     {
-        return include_once static::$MODULE_DIR . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'module.config.php';
+        return include_once static::$MODULE_DIR . DIRECTORY_SEPARATOR . 'config' .
+                                                  DIRECTORY_SEPARATOR . 'module.config.php';
     }
 
     public function getAutoloaderConfig()
