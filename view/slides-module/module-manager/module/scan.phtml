@@ -1,0 +1,19 @@
+
+
+<?php
+/* @var $module SlidesModule\ModuleManager\Model\Module */
+foreach ( $this->availableModule as $module ) : ?>
+    <b><?=$module->getName();?></b>
+    <?=$module->getPath();?><br>
+
+<?php
+endforeach;
+
+/* @var $module SlidesModule\ModuleManager\Model\Module */
+foreach ( $this->enabledModule as $module ) : ?>
+    <b><?=$module->getName();?></b>
+    <?=$module->getPath();?><br>
+
+<?php
+endforeach;
+?>

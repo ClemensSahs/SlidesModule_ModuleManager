@@ -13,7 +13,15 @@ class ModuleController
     }
     public function scanAction ()
     {
-        return array();
+        /* @var $moduleManager \SlidesModule\ModuleManager\Model\ModuleManager */
+        $moduleManager = $this->getServiceLocator()->get('slides-module-manager');
+
+        $moduleManager->scanLocalAvailableModules();
+
+        return array(
+            'availableModule'=>$moduleManager->getAvailableModule(),
+            'enabledModule'=>$moduleManager->getEnabledModule()
+        );
     }
     public function enableAction ()
     {

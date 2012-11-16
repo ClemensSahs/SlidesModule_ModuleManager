@@ -11,15 +11,23 @@ class Module
 
     public function __construct($options)
     {
+        $this->_path = $options['path'];
+        $this->_name = $options['name'];
     }
 
     public function isInstalled()
     {
         return $this->_isInstalled;
     }
+
     public function getName()
     {
         return $this->_name;
+    }
+
+    public function getPath()
+    {
+        return $this->_path;
     }
 
     public function isEnabled()
