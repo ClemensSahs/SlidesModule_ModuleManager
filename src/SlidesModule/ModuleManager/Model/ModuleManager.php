@@ -2,35 +2,74 @@
 
 namespace SlidesModule\ModuleManager\Model;
 
+use Zend\Cache\Storage\StorageInterface;
+
 class ModuleManager
 {
+    protected $_cache = null;
     protected $_modulePaths = null;
     protected $_moduleContainer = array();
 
     protected $_installedModule = null;
     protected $_enabledModule = null;
 
-    public function setLocalModulePaths ($pathArray)
+    public function setLocalModulePaths ($modulePaths)
     {
+        $this->_modulePaths = $modulePaths;
     }
 
     public function setEnabledModules ($moduleList)
     {
+        foreach ( $moduleList as $module ) {
+            if ( is_string($module) ) {
+                $module = $this->getModule($module);
+            } elseif ( is_string($module) ) {
+                $module = $this->getModule($module);
+            }
+        }
+        $this->_enabledModule = $moduleList;
     }
 
-    public function hastModule ( $module)
+    public function setCache ( StorageInterface $cache )
+    {
+        $this->_cache = $cache;
+    }
+
+    /**
+     * @return StorageInterface
+     */
+    public function getCache ()
+    {
+        return $this->_cache;
+    }
+
+    public function hasModule ( $module)
     {
         if ( is_string($module) ) {
-            $this->_moduleContainer[ $module ];
+            return isset($this->_moduleContainer[ $module ]);
         } elseif ( is_object($module) && $module instanceof Module ) {
-            $this->_moduleContainer[ $module->getName() ];
+            return isset($this->_moduleContainer[ $module->getName() ]);
         } else {
             throw new \InvalidArgumentException('hastModule only accept string or a instance of "SlidesModule\ModuleManager\Moduel"');
         }
     }
 
-    public function addModule( Module $module)
+    public function getModule( $moduleName )
     {
+        return $this->_moduleContainer[ $moduleName ];
+    }
+
+    public function addModule( Module $module )
+    {
+        if ( $this->hasModule($module) ) {
+            if ( $this->getModule($module->getName()) == $module ) {
+                $this->_refeshModuleData($module);
+                return true;
+            }
+            throw new \RuntimeException(sprintf('module with the name "%s" all ready exist, but its not the same',$module->getName()));
+        }
+
+        $this->_moduleContainer[ $module->getName() ] = $module;
         $this->_refeshModuleData($module);
     }
 
@@ -65,8 +104,13 @@ class ModuleManager
 
     }
 
-    public function getModule( $moduleName )
+    public function getEnabledModule()
     {
+        return $this->_enabledModule;
+    }
+    public function getAvailableModule()
+    {
+        return $this->_moduleContainer;
     }
 
     public function scanLocalAvailableModules ()
@@ -79,7 +123,10 @@ class ModuleManager
                     continue;
                 }
 
-                $moduleScanRegister[ $pathKey ] = $path . DIRECTORY_SEPARATOR;
+                $this->addModule(new Module(array(
+                    'name'=>$pathKey,
+                    'path'=>$path
+                )));
 
             } else {
 
@@ -95,8 +142,13 @@ class ModuleManager
                     if ( is_string($pathKey) ) {
                         $moduleName = str_replace('*', $moduleName, $pathKey);
                     }
-                    $moduleScanRegister[ $moduleName ]=$modulePath;
+
+                    $this->addModule(new Module(array(
+                        'name'=>$moduleName,
+                        'path'=>$modulePath
+                    )));
                 }
+                unset($scanedDir,$moduleName,$modulePath);
             }
         }
     }
